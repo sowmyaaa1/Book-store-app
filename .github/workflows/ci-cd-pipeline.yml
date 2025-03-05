@@ -21,11 +21,21 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Dependencies
+      - name: Install Backend Dependencies
+        working-directory: backend
         run: npm install
 
-      - name: Run Tests
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Run Backend Tests
+        working-directory: backend
         run: npm test
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
 
   deploy:
     needs: build
@@ -36,13 +46,29 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Deploy to Server
+      - name: Setup SSH & Deploy
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
-          DEPLOY_PATH: /var/www/html/myapp
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
+          # Setup SSH
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no ubuntu@$SERVER_IP "cd $DEPLOY_PATH && git pull origin main && npm install && pm2 restart all"
+          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
+          # Deploy via SSH
+          ssh ubuntu@$SERVER_IP << 'EOF'
+            cd $DEPLOY_PATH
+
+            # Pull latest changes
+            git pull origin main
+
+            # Install dependencies
+            cd backend && npm install
+            cd ../frontend && npm install
+
+            # Restart the application using PM2
+            pm2 restart all || pm2 start backend/server.js --name my-app
+          EOF
