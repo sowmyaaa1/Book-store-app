@@ -22,19 +22,19 @@ jobs:
           node-version: 18
 
       - name: Install Backend Dependencies
-        working-directory: backend
+        working-directory: server
         run: npm install
 
       - name: Install Frontend Dependencies
-        working-directory: frontend
+        working-directory: client
         run: npm install
 
       - name: Run Backend Tests
-        working-directory: backend
+        working-directory: server
         run: npm test
 
       - name: Build Frontend
-        working-directory: frontend
+        working-directory: client
         run: npm run build
 
   deploy:
@@ -66,9 +66,9 @@ jobs:
             git pull origin main
 
             # Install dependencies
-            cd backend && npm install
-            cd ../frontend && npm install
+            cd server && npm install
+            cd ../client && npm install
 
             # Restart the application using PM2
-            pm2 restart all || pm2 start backend/server.js --name my-app
+            pm2 restart all || pm2 start server/server.js --name my-app
           EOF
