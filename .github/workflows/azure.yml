@@ -57,7 +57,7 @@ jobs:
       - name: Deploy Backend to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "my-backend-app"
+          app-name: "Book-store-app"
           package: "./server"
 
       - name: Deploy Frontend to Azure Static Web Apps
