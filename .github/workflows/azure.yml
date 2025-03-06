@@ -3,10 +3,10 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # Runs pipeline when code is pushed to main branch
+      - main
   pull_request:
     branches:
-      - main  # Runs pipeline on pull requests
+      - main
 
 jobs:
   build:
@@ -42,6 +42,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
+    permissions:
+      id-token: write  # This grants write access to id-token, necessary for Azure login
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -49,15 +52,12 @@ jobs:
       - name: Log in to Azure
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Optional but recommended
+          creds: ${{ secrets.AZURE_CREDENTIALS }}  # Use the creds secret here
 
       - name: Deploy Backend to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "my-backend-app"  # Replace with your Azure backend App Service name
+          app-name: "my-backend-app"
           package: "./server"
 
       - name: Deploy Frontend to Azure Static Web Apps
