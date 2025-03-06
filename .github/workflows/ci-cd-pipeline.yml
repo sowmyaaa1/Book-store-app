@@ -46,29 +46,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Setup SSH & Deploy
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run: |
-          # Setup SSH
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-          # Deploy via SSH
-          ssh ubuntu@$SERVER_IP << 'EOF'
-            cd $DEPLOY_PATH
+      - name: Deploy Backend to Azure App Service
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: "my-backend-app"  # Replace with your Azure backend App Service name
+          package: "./server"
 
-            # Pull latest changes
-            git pull origin main
-
-            # Install dependencies
-            cd server && npm install
-            cd ../client && npm install
-
-            # Restart the application using PM2
-            pm2 restart all || pm2 start server/server.js --name my-app
-          EOF
+      - name: Deploy Frontend to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          app_location: "client"
+          output_location: "client/build"
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
