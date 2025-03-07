@@ -19,7 +19,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     environment: 
-      name: Production
+      name: ProductionApp
       url: ${{steps.deploy-to-webapp.outputs.webapp-url}}
       
     defaults: 
