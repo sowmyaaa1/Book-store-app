@@ -1,0 +1,66 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: 
+      - "client/**"
+      - "server/**"
+      - ".github/workflows/build-and-test.yml"
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+    NODE_VERSION: '20.x'                # set this to the node version to use
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: ./client/package-lock.json
+    
+    - name: Install Frontend Dependencies
+      run: |
+        npm install
+
+    - name: Build Frontend
+      run: |
+        npm run build
+
+    - name: Run Frontend Tests
+      run: |
+        npm test
+
+    - name: Set up Node.js for Backend
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: ./server/package-lock.json
+      working-directory: ./server
+    
+    - name: Install Backend Dependencies
+      run: |
+        npm install
+      working-directory: ./server
+
+    - name: Run Backend Tests
+      run: |
+        npm test
+      working-directory: ./server
+
+    - name: Build Backend
+      run: |
+        npm run build
+      working-directory: ./server
