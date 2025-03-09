@@ -18,12 +18,6 @@ permissions:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    environment: 
-      name: ProductionApp
-      url: ${{steps.deploy-to-webapp.outputs.webapp-url}}
-    defaults:
-      run:
-        working-directory: ./client
     steps:
     - uses: actions/checkout@v4
     
@@ -34,9 +28,14 @@ jobs:
         cache: 'npm'
         cache-dependency-path: ./client/package-lock.json
     
-    - name: npm install, build, and test
+    - name: Install Frontend Dependencies
       run: |
+        cd client
         npm install
+
+    - name: Build Frontend
+      run: |
+        cd client
         npm run build
 
     - name: Azure CLI Login
@@ -46,9 +45,9 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           
-    - name: 'Deploy to Azure WebApp'
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
+    - name: 'Deploy Frontend to Azure Static Web Apps'
+      uses: Azure/static-web-apps-deploy@v1
       with:
-        app-name: book-store-frontend
-        package: ./client/build  # Corrected build output directory
+        app_location: "client"
+        output_location: "client/build"
+        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
