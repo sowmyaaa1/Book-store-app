@@ -16,29 +16,14 @@ permissions:
     id-token: write # for azure login
 
 jobs:
-  build_and_deploy:
+  deploy:
     runs-on: ubuntu-latest
     environment: 
       name: ProductionApp
       url: ${{steps.deploy-to-webapp.outputs.webapp-url}}
-    defaults:
-      run:
-        working-directory: ./client
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: ./client/package-lock.json
-    
-    - name: npm install, build, and test
-      run: |
-        npm install
-        npm run build
-
     - name: Azure CLI Login
       uses: azure/login@v2
       with:
@@ -51,4 +36,4 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: book-store-frontend
-        package: ./client/build  # Corrected build output directory
+        package: ./client/build  # Path to the locally built files
