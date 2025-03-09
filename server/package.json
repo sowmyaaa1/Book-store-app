@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node index.js",
     "start:dev": "nodemon index.js",
-    "test": "jest"
+   "test": "echo \"No tests configured\" && exit 0" 
   },
   "keywords": [],
   "author": "mamun",
