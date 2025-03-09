@@ -4,6 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+
+    "build": "vite build",
     "start:dev": "nodemon index.js",
    "test": "echo \"No tests configured\" && exit 0" 
   },
