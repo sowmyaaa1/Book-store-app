@@ -48,7 +48,7 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         cache-dependency-path: ./server/package-lock.json
-      working-directory: ./server
+
     
     - name: Install Backend Dependencies
       run: |
