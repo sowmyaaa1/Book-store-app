@@ -51,4 +51,4 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: book-store-frontend
-        package: ./client/dist
+        package: ./client/build  # Corrected build output directory
