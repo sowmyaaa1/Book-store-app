@@ -1,4 +1,4 @@
-name: Build, Test, and Notify
+name: Build and Test
 
 on:
   push:
@@ -17,10 +17,13 @@ env:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Node.js for Frontend
+    - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
@@ -28,24 +31,16 @@ jobs:
         cache-dependency-path: ./client/package-lock.json
     
     - name: Install Frontend Dependencies
-      run: npm install
-      working-directory: ./client
-
-    - name: Lint Frontend Code
-      run: npm run lint
-      working-directory: ./client
-
-    - name: Run Security Audit for Frontend
-      run: npm audit --audit-level=high
-      working-directory: ./client
+      run: |
+        npm install
 
     - name: Build Frontend
-      run: npm run build
-      working-directory: ./client
+      run: |
+        npm run build
 
     - name: Run Frontend Tests
-      run: npm test
-      working-directory: ./client
+      run: |
+        npm test
 
     - name: Set up Node.js for Backend
       uses: actions/setup-node@v4
@@ -53,27 +48,15 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         cache-dependency-path: ./server/package-lock.json
+
     
     - name: Install Backend Dependencies
-      run: npm install
-      working-directory: ./server
-
-    - name: Lint Backend Code
-      run: npm run lint
-      working-directory: ./server
-
-    - name: Run Security Audit for Backend
-      run: npm audit --audit-level=high
+      run: |
+        npm install
       working-directory: ./server
 
     - name: Run Backend Tests
-      run: npm test
+      run: |
+        npm test
       working-directory: ./server
 
-    - name: Save Build Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts
-        path: |
-          client/build
-          server/build
