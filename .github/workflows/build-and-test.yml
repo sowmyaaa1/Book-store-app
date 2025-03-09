@@ -59,29 +59,4 @@ jobs:
         npm test
       working-directory: ./server
 
-    # Capture build result and send email notification
-    - name: Send Email Notification on Failure
-      if: failure()  # Send only if the job fails
-      uses: dawidd6/action-send-mail@v3
-      with:
-        server_address: smtp.gmail.com
-        server_port: 587
-        username: ${{ secrets.SMTP_USERNAME }}
-        password: ${{ secrets.SMTP_PASSWORD }}
-        subject: "🚨 Build Failed - Bookstore App"
-        to: recipient@example.com
-        from: GitHub Actions <${{ secrets.SMTP_USERNAME }}>
-        body: "The build has failed. Check GitHub Actions for more details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-    - name: Send Email Notification on Success
-      if: success()  # Send only if the job succeeds
-      uses: dawidd6/action-send-mail@v3
-      with:
-        server_address: smtp.gmail.com
-        server_port: 587
-        username: ${{ secrets.SMTP_USERNAME }}
-        password: ${{ secrets.SMTP_PASSWORD }}
-        subject: "✅ Build Succeeded - Bookstore App"
-        to: recipient@example.com
-        from: GitHub Actions <${{ secrets.SMTP_USERNAME }}>
-        body: "The build was successful! Check details here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+   
