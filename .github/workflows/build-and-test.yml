@@ -12,51 +12,80 @@ on:
   workflow_dispatch:
 
 env:
-    NODE_VERSION: '20.x'                # set this to the node version to use
+  NODE_VERSION: '20.x'
 
 jobs:
-  build_and_test:
+  frontend_tests:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./client
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: ./client/package-lock.json
-    
-    - name: Install Frontend Dependencies
-      run: |
-        npm install
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Build Frontend
-      run: |
-        npm run build
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./client/package-lock.json
 
-    - name: Run Frontend Tests
-      run: |
-        npm test
+      - name: Cache Frontend Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('client/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-    - name: Set up Node.js for Backend
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: ./server/package-lock.json
+      - name: Install Dependencies
+        run: npm install
 
-    - name: Install Backend Dependencies
-      run: |
-        npm install
-      working-directory: ./server
+      - name: Run Linter
+        run: npm run lint
 
-    - name: Run Backend Tests
-      run: |
-        npm test
-      working-directory: ./server
+      - name: Check Formatting
+        run: npm run format:check
 
-   
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Run Tests with Coverage
+        run: npm test -- --coverage
+
+  backend_tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./server/package-lock.json
+
+      - name: Cache Backend Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('server/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Check Formatting
+        run: npm run format:check
+
+      - name: Run Tests with Coverage
+        run: npm test -- --coverage
