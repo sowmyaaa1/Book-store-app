@@ -4,10 +4,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-
     "build": "vite build",
     "start:dev": "nodemon index.js",
-   "test": "echo \"No tests configured\" && exit 0" 
+    "test": "echo \"No tests configured\" && exit 0"
   },
   "keywords": [],
   "author": "mamun",
@@ -22,6 +21,7 @@
     "mongoose": "^8.6.3"
   },
   "devDependencies": {
+    "eslint": "^9.22.0",
     "nodemon": "^3.1.7"
   }
 }
