@@ -12,49 +12,76 @@ on:
   workflow_dispatch:
 
 env:
-    NODE_VERSION: '20.x'                # set this to the node version to use
+  NODE_VERSION: '20.x'
 
 jobs:
-  build_and_test:
+  frontend_tests:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./client
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: ./client/package-lock.json
-    
-    - name: Install Frontend Dependencies
-      run: |
-        npm install
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Build Frontend
-      run: |
-        npm run build
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./client/package-lock.json
 
-    - name: Run Frontend Tests
-      run: |
-        npm test
+      - name: Install Dependencies
+        run: npm install
 
-    - name: Set up Node.js for Backend
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: ./server/package-lock.json
+      - name: Audit Dependencies for Security
+        run: npm audit --audit-level=moderate
 
-    - name: Install Backend Dependencies
-      run: |
-        npm install
-      working-directory: ./server
+      - name: Check for Unused Dependencies
+        run: npx depcheck
 
-    - name: Run Backend Tests
-      run: |
-        npm test
-      working-directory: ./server
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Run Tests with Detailed Logs
+        run: npm test -- --verbose
+
+      - name: Upload Frontend Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-results
+          path: client/test-results
+
+  backend_tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./server/package-lock.json
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Audit Dependencies for Security
+        run: npm audit --audit-level=moderate
+
+      - name: Check for Unused Dependencies
+        run: npx depcheck
+
+      - name: Run Tests with Detailed Logs
+        run: npm test -- --verbose
+
+      - name: Upload Backend Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: server/test-results
